@@ -14,6 +14,7 @@ namespace EnhancedBattleTest.SinglePlayer.Data.MissionData
         private int _numWounded;
         private int _numKilled;
         private int _numRouted;
+        public bool _isPlayerSide;
         public int NumActiveTroops => _numAllocated - (_numWounded + _numKilled + _numRouted);
 
         public int NumRemovedTroops => _numWounded + _numKilled + _numRouted;
@@ -22,9 +23,10 @@ namespace EnhancedBattleTest.SinglePlayer.Data.MissionData
 
         public bool AnyTroopRemainsToBeSupplied { get; private set; } = true;
 
-        public SPTroopSupplier(IEnhancedBattleTestCombatant combatant)
+        public SPTroopSupplier(IEnhancedBattleTestCombatant combatant, bool isPlayerSide)
         {
             _combatant = combatant as SPCombatant;
+            _isPlayerSide = isPlayerSide;
             ArrangePriorities();
         }
         private void ArrangePriorities()

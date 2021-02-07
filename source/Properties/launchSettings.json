@@ -2,8 +2,9 @@
   "profiles": {
     "EnhancedBattleTest": {
       "commandName": "Executable",
-      "executablePath": "D:\\Program Files\\Steam\\SteamApps\\common\\Mount & Blade II Bannerlord\\bin\\Win64_Shipping_Client\\TaleWorlds.MountAndBlade.Launcher.exe",
-      "workingDirectory": "D:\\Program Files\\Steam\\SteamApps\\common\\Mount & Blade II Bannerlord\\bin\\Win64_Shipping_Client"
+      "executablePath": "D:\\SteamLibrary\\steamapps\\common\\Mount & Blade II Bannerlord\\bin\\Win64_Shipping_Client\\Bannerlord.exe",
+      "commandLineArgs": "/singleplayer _MODULES_*Native*SandBoxCore*SandBox*StoryMode*CustomBattle*EnhancedBattleTest*_MODULES_",
+      "workingDirectory": "D:\\SteamLibrary\\steamapps\\common\\Mount & Blade II Bannerlord\\bin\\Win64_Shipping_Client"
     }
   }
 }

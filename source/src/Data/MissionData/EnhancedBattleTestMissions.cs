@@ -4,6 +4,7 @@ using System.Linq;
 using EnhancedBattleTest.Config;
 using EnhancedBattleTest.Data.MissionData.Logic;
 using EnhancedBattleTest.Multiplayer.Data.MissionData;
+using EnhancedBattleTest.SinglePlayer.Config;
 using EnhancedBattleTest.SinglePlayer.Data.MissionData;
 using TaleWorlds.CampaignSystem;
 using TaleWorlds.Core;
@@ -105,7 +106,12 @@ namespace EnhancedBattleTest.Data.MissionData
         public static Mission OpenMission(IEnhancedBattleTestCombatant playerParty,
             IEnhancedBattleTestCombatant enemyParty, BattleConfig config, string map)
         {
-            if (config.BattleTypeConfig.BattleType == BattleType.Siege)
+
+            if (config.PlayerTeamConfig.HasGeneral)
+            {
+                Game.Current.PlayerTroop = config.PlayerTeamConfig.General.CharacterObject;
+            }
+            if (config.BattleTypeConfig.BattleType == BattleType.Siege && config.PlayerTeamConfig.HasGeneral)
             {
                 var attackerSiegeWeaponCount = GetSiegeWeaponCount(config.SiegeMachineConfig.AttackerMeleeMachines)
                     .Union(GetSiegeWeaponCount(config.SiegeMachineConfig.AttackerRangedMachines))
@@ -135,10 +141,21 @@ namespace EnhancedBattleTest.Data.MissionData
                 return OpenEnhancedBattleTestSiege(map, config, playerParty, enemyParty, hitPointPercentages,
                     attackerSiegeWeaponCount, defenderSiegeWeaponCount);
             }
-            else
+            else if(config.BattleTypeConfig.BattleType == BattleType.Field || config.BattleTypeConfig.BattleType == BattleType.Village)
             {
+                //var characterObject = (config.PlayerTeamConfig.General as SPCharacterConfig)?.ActualCharacterObject;
+                //EnhancedBattleTestPartyController.PlayerParty.Party.Owner = characterObject.HeroObject;
+                //foreach(BasicCharacterObject player in playerParty.Characters)
+                //{
+                //    if (player.IsPlayerCharacter)
+                //    {
+                //        playerchar = player;
+                //        break;
+                //    }
+                //}
                 return OpenEnhancedBattleTestField(map, config, playerParty, enemyParty);
             }
+            return null;
         }
 
 
@@ -187,8 +204,8 @@ namespace EnhancedBattleTest.Data.MissionData
             bool isPlayerAttacker = playerSide == BattleSideEnum.Attacker;
             IMissionTroopSupplier[] troopSuppliers = new IMissionTroopSupplier[2];
             bool isMultiplayer = EnhancedBattleTestSubModule.IsMultiplayer;
-            troopSuppliers[(int)playerSide] = CreateTroopSupplier(playerParty, isMultiplayer);
-            troopSuppliers[(int)enemySide] = CreateTroopSupplier(enemyParty, isMultiplayer);
+            troopSuppliers[(int)playerSide] = CreateTroopSupplier(playerParty, isMultiplayer, true);
+            troopSuppliers[(int)enemySide] = CreateTroopSupplier(enemyParty, isMultiplayer, false);
             bool isPlayerGeneral = config.BattleTypeConfig.PlayerType == PlayerType.Commander || !hasPlayer;
             bool isPlayerSergeant = hasPlayer && config.BattleTypeConfig.PlayerType == PlayerType.Sergeant;
 
@@ -318,8 +335,8 @@ namespace EnhancedBattleTest.Data.MissionData
             bool isPlayerAttacker = playerSide == BattleSideEnum.Attacker;
             IMissionTroopSupplier[] troopSuppliers = new IMissionTroopSupplier[2];
             bool isMultiplayer = EnhancedBattleTestSubModule.IsMultiplayer;
-            troopSuppliers[(int)playerSide] = CreateTroopSupplier(playerParty, isMultiplayer);
-            troopSuppliers[(int)enemySide] = CreateTroopSupplier(enemyParty, isMultiplayer);
+            troopSuppliers[(int)playerSide] = CreateTroopSupplier(playerParty, isMultiplayer, true);
+            troopSuppliers[(int)enemySide] = CreateTroopSupplier(enemyParty, isMultiplayer, false);
             bool isPlayerGeneral = config.BattleTypeConfig.PlayerType == PlayerType.Commander;
             bool isPlayerSergeant = hasPlayer && config.BattleTypeConfig.PlayerType == PlayerType.Sergeant;
 
@@ -393,8 +410,7 @@ namespace EnhancedBattleTest.Data.MissionData
                     new FieldBattleController(),
                     new AgentFadeOutLogic(),
                     new AgentMoraleInteractionLogic(),
-                    new AssignPlayerRoleInTeamMissionController(isPlayerGeneral, isPlayerSergeant, hasPlayer,
-                        charactersInPlayerSideByPriority?.Select(character => character.StringId).ToList()),
+                    new AssignPlayerRoleInTeamMissionController(isPlayerGeneral, isPlayerSergeant, isPlayerInArmy: false, isPlayerSergeant ? Enumerable.Repeat(config.PlayerTeamConfig.General.CharacterObject.StringId, 1).ToList() : new List<string>()),
                     new CreateBodyguardMissionBehavior(
                         isPlayerAttacker ? playerTeamGeneralName : enemyTeamGeneralName,
                         !isPlayerAttacker ? playerTeamGeneralName : enemyTeamGeneralName,
@@ -404,7 +420,7 @@ namespace EnhancedBattleTest.Data.MissionData
                 });
         }
 
-        private static IEnhancedBattleTestTroopSupplier CreateTroopSupplier(IEnhancedBattleTestCombatant combatant, bool isMultiplayer)
+        private static IEnhancedBattleTestTroopSupplier CreateTroopSupplier(IEnhancedBattleTestCombatant combatant, bool isMultiplayer, bool _isPlayerSide)
         {
             if (isMultiplayer)
             {
@@ -412,7 +428,7 @@ namespace EnhancedBattleTest.Data.MissionData
             }
             else
             {
-                return new SPTroopSupplier(combatant);
+                return new SPTroopSupplier(combatant, _isPlayerSide);
             }
         }
 

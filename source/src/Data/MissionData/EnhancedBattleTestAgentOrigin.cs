@@ -10,6 +10,7 @@ namespace EnhancedBattleTest.Data.MissionData
         private readonly IEnhancedBattleTestTroopSupplier _troopSupplier;
         private bool _isRemoved;
         private readonly BattleSideEnum _side;
+        private bool _isPlayerSide;
 
         public bool IsUnderPlayersCommand => _side == Mission.Current.PlayerTeam.Side;
         public virtual uint FactionColor => BattleCombatant.BasicCulture.Color;
